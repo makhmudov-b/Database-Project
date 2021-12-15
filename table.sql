@@ -37,3 +37,21 @@ CREATE TABLE dbo.UserSubscription
     UserID INT NOT NULL,
     FOREIGN KEY (UserID) REFERENCES dbo.Users(UserID)
 )
+CREATE TABLE dbo.Purchases
+(
+    ID INT PRIMARY KEY NOT NULL,
+    UserID INT NOT NULL,
+    FOREIGN KEY (UserID) REFERENCES dbo.Users(UserID),
+    SubscriptionTypesID INT NOT NULL,
+    FOREIGN KEY (SubscriptionTypesID) REFERENCES dbo.SubscriptionTypes(ID),
+    PurchaseDateTime DATETIME NOT NULL,
+    ShowPriceID INT NOT NULL,
+    PurchaseSum DECIMAL(3, 2) NOT NULL,
+    DebetCard BIT 
+)
+CREATE TABLE dbo.ShowsPrices
+(
+    ID INT PRIMARY KEY NOT NULL,
+    ShowID INT,
+    Price DECIMAL(3, 2)
+)
