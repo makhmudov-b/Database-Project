@@ -57,13 +57,17 @@ CREATE TABLE dbo.Purchases
     ID INT PRIMARY KEY NOT NULL,
     UserID INT NOT NULL,
     FOREIGN KEY (UserID) REFERENCES dbo.Users(UserID),
-    SubscriptionTypesID INT NULL, -- could be show either subsription
-    FOREIGN KEY (SubscriptionTypesID) REFERENCES dbo.SubscriptionTypes(ID),
+    SubscriptionTypeID INT NULL, -- could be show either subsription
+    FOREIGN KEY (SubscriptionTypeID) REFERENCES dbo.SubscriptionTypes(ID),
     PurchaseDateTime DATETIME NOT NULL,
     ShowPriceID INT NULL, -- could be show either subsription
-    FOREIGN KEY (SubscriptionTypesID) REFERENCES dbo.SubscriptionTypes(ID),
+    FOREIGN KEY (ShowPriceID) REFERENCES dbo.ShowsPrices(ID),
     PurchaseSum DECIMAL(4, 2) NOT NULL,
-    DebetCard BIT 
+    DebetCard BIT,
+    CHECK (
+        (SubscriptionTypeID IS NULL AND ShowPriceID IS NOT NULL)
+        OR (SubscriptionTypeID IS NOT NULL AND ShowPriceID IS NULL)
+    )
 )
 
 -- The table for the shows --
@@ -97,6 +101,7 @@ CREATE TABLE dbo.Shows
     FOREIGN KEY (RatingID) REFERENCES dbo.UserReview(RatingID), -- connect for metrics
     Description NVARCHAR(256),
     TypeOfShow INT NOT NULL -- series, film, and could be upgraded to podcasts or talk show
+    FOREIGN KEY (TypeOfShow) REFERENCES dbo.ShowTypes(ID)
 )
 
 -- The table for all unique session (for metrics, of course) --
@@ -198,7 +203,12 @@ CREATE TABLE dbo.[Show/season/episodes genre]
     SeasonID INT NULL,
     FOREIGN KEY (SeasonID) REFERENCES dbo.Season(ID),
     EpisodeID INT NULL,
-    FOREIGN KEY (EpisodeID) REFERENCES dbo.Episodes(ID)
+    FOREIGN KEY (EpisodeID) REFERENCES dbo.Episodes(ID),
+    CHECK (
+        2 = (CASE WHEN ShowID IS NULL THEN 1 ELSE 0 END ) +
+        (CASE WHEN SeasonID IS NULL THEN 1 ELSE 0 END ) +
+        (CASE WHEN EpisodeID IS NULL THEN 1 ELSE 0 END )
+    )
 )
 
 -- The total rating of each piece of media --
@@ -210,7 +220,13 @@ CREATE TABLE dbo.Rating
     SeasonID INT NULL,
     FOREIGN KEY (SeasonID) REFERENCES dbo.Season(ID),
     ShowID INT NULL,
-    FOREIGN KEY (ShowID) REFERENCES dbo.Shows(ID) 
+    FOREIGN KEY (ShowID) REFERENCES dbo.Shows(ID),
+    Grade DECIMAL(4,2),
+    CHECK (
+        2 = (CASE WHEN ShowID IS NULL THEN 1 ELSE 0 END ) +
+        (CASE WHEN SeasonID IS NULL THEN 1 ELSE 0 END ) +
+        (CASE WHEN EpisodeID IS NULL THEN 1 ELSE 0 END )
+    )
 )
 
 -- Table for possible position of a person --
