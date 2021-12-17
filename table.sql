@@ -60,14 +60,14 @@ CREATE TABLE dbo.Purchases
     SubscriptionTypeID INT NULL, -- could be show either subsription
     FOREIGN KEY (SubscriptionTypeID) REFERENCES dbo.SubscriptionTypes(ID),
     PurchaseDateTime DATETIME NOT NULL,
-    ShowPriceID INT NULL, -- could be show either subsription
+    ShowPriceID INT NULL, -- could be show either subsription (used XOR down here)
     FOREIGN KEY (ShowPriceID) REFERENCES dbo.ShowsPrices(ID),
     PurchaseSum DECIMAL(4, 2) NOT NULL,
     DebetCard BIT,
     CHECK (
         (SubscriptionTypeID IS NULL AND ShowPriceID IS NOT NULL)
         OR (SubscriptionTypeID IS NOT NULL AND ShowPriceID IS NULL)
-    )
+    ) --show or sub checker
 )
 
 -- The table for the shows --
@@ -208,7 +208,7 @@ CREATE TABLE dbo.[Show/season/episodes genre]
         2 = (CASE WHEN ShowID IS NULL THEN 1 ELSE 0 END ) +
         (CASE WHEN SeasonID IS NULL THEN 1 ELSE 0 END ) +
         (CASE WHEN EpisodeID IS NULL THEN 1 ELSE 0 END )
-    )
+    ) --checking so the row would be for specific piece of media so it wont mess up
 )
 
 -- The total rating of each piece of media --
@@ -226,16 +226,16 @@ CREATE TABLE dbo.Rating
         2 = (CASE WHEN ShowID IS NULL THEN 1 ELSE 0 END ) +
         (CASE WHEN SeasonID IS NULL THEN 1 ELSE 0 END ) +
         (CASE WHEN EpisodeID IS NULL THEN 1 ELSE 0 END )
-    )
+    )--checking so the row would be for specific piece of media so it wont mess up
 )
 
--- Table for possible position of a person --
+-- Table for possible position of a person (like writer, producer or actor)--
 CREATE TABLE dbo.Positions
 (
     ID INT NOT NULL PRIMARY KEY,
     ShowID INT NOT NULL,
     FOREIGN KEY (ShowID) REFERENCES dbo.Shows(ID),
-    Description NVARCHAR NOT NULL
+    Description NVARCHAR(128) NOT NULL 
 )
 
 -- The table of cinema celebreties --
